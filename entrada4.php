@@ -3,6 +3,23 @@
     <?php
 session_start();
 $user = $_SESSION['username'];
+$url ="reportespdf.php"; // aqui pones la url
+$tiempo_espera = 10; // Aquí se configura cuántos segundos hasta la actualización.
+// Declaramos la funcion apra la redirección
+if(header("refresh: $tiempo_espera; url=$url")){
+    $user = $_SESSION['username'];
+    $texto = "Sesion cerrada "." De parte de :" .$user;
+    $asunto = "SESION" ;
+    //$correo = "Papercut@papercut.com";
+    $cabeceras = "From:".$correo . "\r\n" .
+        "Reply-To: Papercut@user.com" . "\r\n" .
+        "X-Mailer: PHP/" . phpversion();
+    $from = "Papercut@user.com";
+    $mail = mail($from, $asunto, $texto, $cabeceras);
+    if($mail){
+        echo " Reporte enviado";
+    }
+}
 ?>
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 
@@ -51,13 +68,13 @@ $user = $_SESSION['username'];
                     $password = "";
                     $dbname = "qr_basedatos";
           
-                    $con2 = new mysqli($server,$username,$password,$dbname);
-                    if($con2->connect_error){
-                        die("Connection failed" .$con2->connect_error);
+                    $con = new mysqli($server,$username,$password,$dbname);
+                    if($con->connect_error){
+                        die("Connection failed" .$con->connect_error);
                     }
                     //CAMBIAR
                     $sql2 = "SELECT * from acceso4";
-                    $query2 = $con2->query($sql2);
+                    $query2 = $con->query($sql2);
                     while($row= $query2->fetch_assoc()){
                     ?>
                     <tr>
@@ -115,13 +132,42 @@ $user = $_SESSION['username'];
                 $sql = "SELECT Nombre,IdRol,Estado,Correo FROM usuario WHERE IdUsuario ='$text'";
                 $con = $con->query($sql);
                 if( $con->num_rows>0){
-                    echo "Usuario registrado";
                     while($row = $con->fetch_array()){
                         $name=$row['Nombre'];
-                        $rol=$row['IdRol'];
-                        $estado=$row['Estado'];
-                        $correo=$row['Correo'];
+                    }                    
+                    $con = new mysqli($server,$username,$password,$dbname);
+                    $consulta = "SELECT * FROM usuario WHERE Nombre ='$name' and IdUsuario <>'$text'";
+                    $consultaSuplantacion = $con->query($consulta);
+                    if($consultaSuplantacion->num_rows>1){
+                        //$deleteSuplante = $con->query("DELETE FROM `usuario` WHERE IdUsuario <> '$text'");
+                        echo "Intento de suplantacion";
+                        $user = $_SESSION['username'];
+                        $texto = "Intento de suplantacion en la entrada "." De parte de :" .$user;
+                        $asunto = "SUPLATACION" ;
+                        //$correo = "Papercut@papercut.com";
+                        $cabeceras = "From:".$correoU . "\r\n" .
+                            "Reply-To: Papercut@user.com" . "\r\n" .
+                            "X-Mailer: PHP/" . phpversion();
+                        $from = "Papercut@user.com";
+                        $mail = mail($from, $asunto, $texto, $cabeceras);
+                        if($mail){
+                            echo " Reporte enviado";
+                        }
+                        //header('location:index.php');
+                        exit();
+                    }else{
+                        $con = $con->query($sql);
+                        echo "Usuario registrado ";
+                        while($row = $con->fetch_array()){
+                            $name=$row['Nombre'];
+                            $rol=$row['IdRol'];
+                            $estado=$row['Estado'];
+                            $correo=$row['Correo'];
+                        }
                     }
+                    
+                    
+                    
                 }else{
                     echo "Usuario no registrado";
                     $name=null;

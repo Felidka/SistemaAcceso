@@ -3,7 +3,7 @@
 require 'conexion.php';
 session_start();
 date_default_timezone_set('UTC');
-$asunto = "Reporte del dia ".date("d/m/Y G:i:s");
+$asunto = "Reporte del dia ".date("d/m/Y G:i:s")." Entrada ";
 $user = $_SESSION['username'];
 if($user == 'user1'){
     $bandera = 1;
