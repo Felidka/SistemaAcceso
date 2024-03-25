@@ -1,4 +1,25 @@
 <html>
+<?php
+session_start();
+$user = $_SESSION['username'];
+$url ="reportespdf.php"; // aqui pones la url
+$tiempo_espera = 10; // Aquí se configura cuántos segundos hasta la actualización.
+// Declaramos la funcion apra la redirección
+if(header("refresh: $tiempo_espera; url=$url")){
+    $user = $_SESSION['username'];
+    $texto = "Sesion cerrada "." De parte de :" .$user;
+    $asunto = "SESION" ;
+    //$correo = "Papercut@papercut.com";
+    $cabeceras = "From:".$correo . "\r\n" .
+        "Reply-To: Papercut@user.com" . "\r\n" .
+        "X-Mailer: PHP/" . phpversion();
+    $from = "Papercut@user.com";
+    $mail = mail($from, $asunto, $texto, $cabeceras);
+    if($mail){
+        echo " Reporte enviado";
+    }
+}
+?>
     <head>
 
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
@@ -9,7 +30,7 @@
     <body>
         <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">Entrada Peatonal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
@@ -17,12 +38,14 @@
         <div class="navbar-nav">
             <a class="nav-link active" aria-current="page" href="entrada1.php">Entrada 1</a>
             <a class="nav-link" href="reportes.php">Reportes</a>
+            <a class="nav-link" href="vehiculos.php">Vehiculos</a>
             <a class="btn btn-danger" href="index.php">Salir</a>
 
         </div>
         </div>
     </div>
     </nav>
+    <!---COMENTARIO>
         <div class="conteiner">
             <table class="table table-bordered">
                 <thead>
@@ -47,12 +70,12 @@
                     $password = "";
                     $dbname = "qr_basedatos";
           
-                    $con2 = new mysqli($server,$username,$password,$dbname);
-                    if($con2->connect_error){
-                        die("Connection failed" .$con2->connect_error);
+                    $con = new mysqli($server,$username,$password,$dbname);
+                    if($con->connect_error){
+                        die("Connection failed" .$con->connect_error);
                     }
-                    $sql2 = "SELECT * from entrada1";
-                    $query2 = $con2->query($sql2);
+                    $sql2 = "SELECT * from acceso1";
+                    $query2 = $con->query($sql2);
                     while($row= $query2->fetch_assoc()){
                     ?>
                     <tr>
@@ -87,35 +110,9 @@
                         <label>SCAN QR CODE</label>
                         <input type="text" name="text" id="txt1" placeholder="scann qr" class="from-control">
                     </form>
-                </div>
-            </div>
-        </div>
-        <script type="text/javascript">
-            var scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5, mirror: false });
-            
-            Instascan.Camera.getCameras().then(function (cameras){
-                if(cameras.length>0){
-                    scanner.start(cameras[0]);
-                }else{
-                    console.error('No cameras found.');
-                    alert('No cameras found.');
-                }
-            }).catch(function(e){
-                console.error(e);
-                alert(e);
-            });
-            scanner.addListener('scan',function(content){
-                document.getElementById('txt1').value=content; 
-                //window.location.href=content;
-                document.forms[0].submit();
-
-            });
-        </script>
-        <div class="d-flex">
-        <div class="card col-sm-6">
-        <div class="card-body">
-        <form method="post" action="acceso.php">
+                    <form method="post" action="acceso.php">
         <?php
+        /*
             $server = "localhost";
             $username = "root";
             $password = "";
@@ -127,19 +124,51 @@
                 die("Connection failed" .$con->connect_error);
             }
             if(isset($_POST['text'])){
+                
                 $text = $_POST['text'];
                 $name;
                 $rol;
                 $estado;
-                $sql = "SELECT Nombre,IdRol,Estado FROM usuario WHERE IdUsuario ='$text'";
+                $correo;
+                $sql = "SELECT Nombre,IdRol,Estado,Correo FROM usuario WHERE IdUsuario ='$text'";
                 $con = $con->query($sql);
                 if( $con->num_rows>0){
-                    echo "Usuario registrado";
                     while($row = $con->fetch_array()){
                         $name=$row['Nombre'];
-                        $rol=$row['IdRol'];
-                        $estado=$row['Estado'];
+                    }                    
+                    $con = new mysqli($server,$username,$password,$dbname);
+                    $consulta = "SELECT * FROM usuario WHERE Nombre ='$name' and IdUsuario <>'$text'";
+                    $consultaSuplantacion = $con->query($consulta);
+                    if($consultaSuplantacion->num_rows>1){
+                        //$deleteSuplante = $con->query("DELETE FROM `usuario` WHERE IdUsuario <> '$text'");
+                        echo "Intento de suplantacion";
+                        $user = $_SESSION['username'];
+                        $texto = "Intento de suplantacion en la entrada "." De parte de :" .$user;
+                        $asunto = "SUPLATACION" ;
+                        //$correo = "Papercut@papercut.com";
+                        $cabeceras = "From:".$correoU . "\r\n" .
+                            "Reply-To: Papercut@user.com" . "\r\n" .
+                            "X-Mailer: PHP/" . phpversion();
+                        $from = "Papercut@user.com";
+                        $mail = mail($from, $asunto, $texto, $cabeceras);
+                        if($mail){
+                            echo " Reporte enviado";
+                        }
+                        //header('location:index.php');
+                        exit();
+                    }else{
+                        $con = $con->query($sql);
+                        echo "Usuario registrado ";
+                        while($row = $con->fetch_array()){
+                            $name=$row['Nombre'];
+                            $rol=$row['IdRol'];
+                            $estado=$row['Estado'];
+                            $correo=$row['Correo'];
+                        }
                     }
+                    
+                    
+                    
                 }else{
                     echo "Usuario no registrado";
                     $name=null;
@@ -147,15 +176,18 @@
                     $estado=1;
                 }
             }
-            $con->close();
         ?>
         <div class="form-group">
             <label>Id</label>
-            <input type="text" name="txtID" value="<?php echo $text?>" class="form-control">
+            <input type="text" name="txtID" value="<?php echo $text?>" class="form-control" readonly>
         </div>
         <div class="form-group">
             <label>Nombre</label>
             <input type="text" name="txtNombre" value="<?php echo $name?>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Correo</label>
+            <input type="text" name="txtCorreo" value="<?php echo $correo?>" class="form-control">
         </div>
         <div class="form-group">
             <label>Rol</label>
@@ -183,22 +215,46 @@
                 <option>Camina</option>
                 <option>Moto</option>
                 <option>Carro</option>
+                <option>Bicicleta</option>
+                <option>Acompañante</option>
             </select>  
         </div>
         <div class="form-group">
             <label>Placa</label>
-            <input type="text" name="txtPlaca"class="form-control" name="txtPlaca">
+            <input type="text" name="txtPlaca"class="form-control">
         </div>
         <br>
         <button name="actualizar" onclick="window.location.reload()" class="btn btn-primary">Actualizar</button>
         <button name="eliminar" class="btn btn-danger">Eliminar</button>
-
+<?php 
+*/?>
         </form>
-         
+        
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5, mirror: false });
+            
+            Instascan.Camera.getCameras().then(function (cameras){
+                if(cameras.length>0){
+                    scanner.start(cameras[0]);
+                }else{
+                    console.error('No cameras found.');
+                    alert('No cameras found.');
+                }
+            }).catch(function(e){
+                console.error(e);
+                alert(e);
+            });
+            scanner.addListener('scan',function(content){
+                document.getElementById('txt1').value=content; 
+                //window.location.href=content;
+                document.forms[0].submit();
 
-        </div>
-        </div>
-        </div>
+            });
+        </script>
+
         
     </body>
 </html>

@@ -2,20 +2,9 @@
     <head>
     <?php
 session_start();
-$server = "localhost";
-$username = "root";
-$password = "";
-$dbname = "qr_basedatos";
-
-$con = new mysqli($server,$username,$password,$dbname);
 $user = $_SESSION['username'];
-$consulta = "SELECT correo FROM empleado where username='$user'";
-$qConsulta = $con->query($consulta);
-while($row = $qConsulta->fetch_assoc()){
-  $correoU = $row['correo'];
-}
 $url ="reportespdf.php"; // aqui pones la url
-$tiempo_espera = 30; // Aquí se configura cuántos segundos hasta la actualización.
+$tiempo_espera = 231654564564; // Aquí se configura cuántos segundos hasta la actualización.
 // Declaramos la funcion apra la redirección
 if(header("refresh: $tiempo_espera; url=$url")){
     $user = $_SESSION['username'];
@@ -46,7 +35,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-link active" aria-current="page" href="entrada2.php">Entrada 2</a>
+            <a class="nav-link active" aria-current="page" href="entrada3.php">Entrada 3</a>
             <a class="nav-link" href="reportes.php">Reportes</a>
             <a class="nav-link" href="vehiculos.php">Vehiculos</a>
             <a class="btn btn-danger" href="index.php">Salir</a>
@@ -84,7 +73,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
                         die("Connection failed" .$con->connect_error);
                     }
                     //CAMBIAR
-                    $sql2 = "SELECT * from acceso2";
+                    $sql2 = "SELECT * from acceso3";
                     $query2 = $con->query($sql2);
                     while($row= $query2->fetch_assoc()){
                     ?>
@@ -118,7 +107,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
                 <div class="col-md-6">
                     <!-- CAMBIAR -->
 
-                    <form action="entrada2.php" method="post" class="form-horizontal">
+                    <form action="entrada3.php" method="post" class="form-horizontal">
                         <label>SCAN QR CODE</label>
                         <input type="text" name="text" id="txt1" placeholder="scann qr" class="from-control">
                     </form>
@@ -141,9 +130,9 @@ if(header("refresh: $tiempo_espera; url=$url")){
                 $estado;
                 $correo;
                 $sql = "SELECT Nombre,IdRol,Estado,Correo FROM usuario WHERE IdUsuario ='$text'";
-                $con = $con->query($sql);
-                if( $con->num_rows>0){
-                    while($row = $con->fetch_array()){
+                $conn = $con->query($sql);
+                if($conn->num_rows>0){
+                    while($row = $conn->fetch_array()){
                         $name=$row['Nombre'];
                     }                    
                     $con = new mysqli($server,$username,$password,$dbname);
@@ -176,9 +165,6 @@ if(header("refresh: $tiempo_espera; url=$url")){
                             $correo=$row['Correo'];
                         }
                     }
-                    
-                    
-                    
                 }else{
                     echo "Usuario no registrado";
                     $name=null;
@@ -188,7 +174,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
             }
             $con->close();
         ?>
-       <div class="form-group">
+        <div class="form-group">
             <label>Id</label>
             <input type="text" name="txtID" value="<?php echo $text?>" class="form-control" readonly>
         </div>
@@ -202,7 +188,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
         </div>
         <div class="form-group">
             <label>Rol</label>
-            <input type="text" name="txtRol" value="<?php echo $rol?>" class="form-control" readonly>
+            <input type="text" name="txtRol" value="<?php echo $rol?>" class="form-control">
             <label>1.Administrativo</label>
             <label>2.Estudiante</label>
             <label>3.Docente</label>
@@ -211,12 +197,12 @@ if(header("refresh: $tiempo_espera; url=$url")){
         <div class="form-group">
             <label>Entrada</label>
             <!-- CAMBIAR -->
-            <input type="text" name="txtEntrada" value=2 class="form-control" readonly>
+            <input type="text" name="txtEntrada" value=3 class="form-control">
         </div>
         <div class="form-group">
             <label>Salida</label>
             <!-- CAMBIAR -->
-            <input type="text" name="txtSalida" value=2 class="form-control" readonly>
+            <input type="text" name="txtSalida" value=3 class="form-control">
         </div>
         <div class="form-group">
             <label>Estado</label>
@@ -265,6 +251,7 @@ if(header("refresh: $tiempo_espera; url=$url")){
 
             });
         </script>
+
         
     </body>
 </html>

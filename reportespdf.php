@@ -32,7 +32,7 @@ ob_start();
                     if($con2->connect_error){
                         die("Connection failed" .$con2->connect_error);
                     }
-                    $sql2 = "SELECT IdIngreso, IdUsuario, Nombre, HoraEntrada, HoraSalida, FormaLlegada, Placa, Estado from acceso";
+                    $sql2 = "SELECT IdIngreso, IdUsuario, Nombre, HoraEntrada, HoraSalida, FormaLlegada, Placa, Estado from acceso where Estado = 1";
                     $query2 = $con2->query($sql2);
                     while($row= $query2->fetch_assoc()){
                     ?>
